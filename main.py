@@ -180,7 +180,7 @@ def main():
     args = p.parse_args()
 
     words = load_words(args.wordlist, args.minlen, args.maxlen, args.charset)
-    print(f"Words of length 4-5: {len(words)}")
+    print(f"Words of length {args.minlen}-{args.maxlen}: {len(words)}")
 
     print("Matching...")
     try:
