@@ -1,0 +1,9 @@
+[project]
+name = "letterpakken"
+version = "0.1.0"
+description = "A game to make (Dutch) words from letters."
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "pandas>=2.3.2",
+]
