@@ -7,53 +7,38 @@ from pathlib import Path
 import pandas as pd
 
 
-def load_words(path: Path) -> pd.Series:
+def load_words(
+    path: Path, min_len: int = 4, max_len: int = 5, charset: str = "a-z"
+) -> pd.Series:
     """
-    Load a word list and optionally filter it to 4–5 letter lowercase words.
+    Load a word list and optionally filter it by length and character set.
 
     Parameters
     ----------
     path : Path
-        Path to the word list file. If `wordlist45.txt` exists, it will be
-        used directly. Otherwise, `wordlist.txt` is loaded and filtered.
+        Path to the word list file.
+    min_len : int, optional
+        Minimum word length to include (default=4).
+    max_len : int, optional
+        Maximum word length to include (default=5).
+    charset : str, optional
+        Allowed characters expressed as a regex character class
+        (default="a-z").
 
     Returns
     -------
     pd.Series
-        Series of words (strings), either pre-filtered or newly filtered
-        to only include 4–5 letter lowercase alphabetic words.
-
-    Notes
-    -----
-    - If filtering is applied, the filtered word list is saved to
-      `wordlist45.txt` in the same directory as the source file.
+        Series of words filtered by length and character set.
     """
-    path = Path("./wordlist45.txt")
-    if path.is_file():
-        print(f"Loading words from {path}")
-        already_filtered = True
-    else:
-        print("Loading default word list from ./wordlist.txt")
-        path = Path("./data/wordlist.txt")
-        already_filtered = False
-
     df = pd.read_csv(
         path, header=None, names=["word"], dtype=str, keep_default_na=False
     )
     words = df["word"].str.strip()
     words = words[words != ""]
 
-    if already_filtered:
-        return words
-
-    # Filter
-    pattern = re.compile(r"^[a-z]{4,5}$")
+    # Filter by length and character set
+    pattern = re.compile(rf"^[{charset}]{{{min_len},{max_len}}}$")
     filtered = words[words.apply(lambda w: bool(pattern.match(w)))]
-
-    # Save
-    out_path = path.parent / "wordlist45.txt"
-    filtered.to_csv(out_path, index=False, header=False)
-    print(f"Saved filtered words of length 4-5 to {out_path}")
 
     return filtered
 
@@ -135,7 +120,7 @@ def build_regex_from_sets(sets, minlen=4, maxlen=5):
                 f"(?!(?:.*{re.escape(a)}.*{re.escape(b)}|.*{re.escape(b)}.*{re.escape(a)}))"
             )
 
-     # 2) Forbid repeats globally
+    # 2) Forbid repeats globally
     lookaheads.append(f"(?!.*([{re.escape(charclass)}]).*\\1)")
 
     # 3) Final body: only letters from union and within length bounds
@@ -162,8 +147,12 @@ def main():
         Minimum word length (default: 4).
     --maxlen : int, optional
         Maximum word length (default: 5).
+    --charset : str, optional
+        Allowed character set (default: a-z).
     --out : Path, optional
         Path to save the matched words (one per line).
+    --wordlist : Path, optional
+        Path to the word list file (default: ./data/wordlist.txt).
     """
     p = argparse.ArgumentParser()
     p.add_argument(
@@ -180,11 +169,17 @@ def main():
         "--maxlen", type=int, default=5, help="Maximum word length (default: 5)"
     )
     p.add_argument(
+        "--charset", type=str, default="a-z", help="Allowed character set (default: a-z)"
+    )
+    p.add_argument(
         "--out", type=Path, help="Optional file to save matches (one per line)"
+    )
+    p.add_argument(
+        "--wordlist", type=Path, default=Path("./data/wordlist.txt"), help="Path to word list file"
     )
     args = p.parse_args()
 
-    words = load_words("./wordlist.txt")
+    words = load_words(args.wordlist, args.minlen, args.maxlen, args.charset)
     print(f"Words of length 4-5: {len(words)}")
 
     print("Matching...")
@@ -202,8 +197,8 @@ def main():
     matches = words[words.apply(lambda w: bool(pattern.match(w)))]
 
     print(f"  Total matches: {len(matches)}")
-    print("  First 50:")
-    print(matches.iloc[:50].to_list())
+    print("  First 20:")
+    print(matches.iloc[:20].to_list())
 
     if args.out:
         matches.to_csv(args.out, index=False, header=False)
