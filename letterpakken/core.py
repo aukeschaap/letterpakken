@@ -1,13 +1,10 @@
 import re
 from pathlib import Path
-from typing import Callable, Iterable, List
+from typing import Iterable, List
 
-from .matching import is_valid
+from ._typing import LetterSet
 
 INF: int = 10**9
-
-LetterSet = str
-AdjList = List[List[int]]
 
 
 def load_words(path: Path) -> List[str]:

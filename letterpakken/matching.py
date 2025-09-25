@@ -1,12 +1,12 @@
 from collections import deque
-from typing import Iterable, List, Sequence, Tuple
+from typing import List, Tuple
+
+from ._typing import AdjList, LetterSet
 
 INF: int = 10**9
-AdjList = List[List[int]]
-LetterSet = Sequence[str]
 
 
-def is_valid(word: str, letter_sets: Iterable[LetterSet]) -> bool:
+def is_valid(word: str, letter_sets: List[LetterSet]) -> bool:
     """
     Decide if there exists an assignment of positions in ``word`` to the sets
     so that each set consumes exactly one character and that character belongs

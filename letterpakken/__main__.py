@@ -3,6 +3,7 @@ from typing import List, Optional
 
 import typer
 
+from ._typing import LetterSet
 from .core import filter_words, load_words, validate_sets
 from .matching import is_valid
 
@@ -11,7 +12,7 @@ app = typer.Typer(add_completion=False)
 
 @app.command()
 def main(
-    sets: List[str] = typer.Option(
+    sets: List[LetterSet] = typer.Option(
         ...,
         "--set",
         "-s",
