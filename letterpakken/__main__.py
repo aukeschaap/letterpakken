@@ -18,8 +18,6 @@ def main(
         "-s",
         help="A set of mutually exclusive letters (lowercase a-z). Repeat for multiple sets.",
     ),
-    minlen: int = typer.Option(4, help="Minimum word length."),
-    maxlen: int = typer.Option(5, help="Maximum word length."),
     out: Optional[Path] = typer.Option(
         None, "--out", help="Optional file to save matches (one per line)."
     ),
